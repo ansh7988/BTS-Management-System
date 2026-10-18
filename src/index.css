@@ -1,0 +1,18 @@
+:root{--f:#12372A;--fd:#0B231A;--g:#C5A059;--gl:#EED596;--c:#FBF9F4;--b:#E5E0D5}
+*{box-sizing:border-box}body{margin:0;background:var(--c);color:#1e1b15;font:16px/1.4 'Plus Jakarta Sans',system-ui,sans-serif}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:.3em 0;color:var(--fd)}h1{font-size:24px}h2{font-size:19px}
+.app{min-height:100vh;padding-bottom:84px}.main{max-width:900px;margin:auto;padding:16px}
+.card{background:#fff;border:1px solid var(--b);border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 2px 10px #0b231a0d}
+.tap{cursor:pointer}.btn{min-height:48px;padding:0 18px;border:0;border-radius:12px;background:var(--f);color:#fff;font:600 16px inherit;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.btn.g{background:linear-gradient(135deg,var(--gl),var(--g));color:var(--fd)}.btn.o{background:#fff;color:var(--f);border:1.5px solid var(--f)}.btn:disabled{opacity:.5}.btn.w{width:100%}
+.in{width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--b);border-radius:12px;font:inherit;background:#fff}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px;color:#414844}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pill{padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;background:#EEF4FC;color:#1C58A6;white-space:nowrap}.pill.Paid,.pill.Delivered{background:#E9F7F1;color:#0E754C}.pill.Unpaid,.pill.Cancelled{background:#FDECEB;color:#B0231D}.pill.Partially.Paid,.pill.Booked{background:#FDF8E8;color:#976A05}
+.big{font:700 24px 'Space Grotesk';color:var(--fd)}.sm{font-size:13px;color:#717974}.err{background:#FDECEB;color:#B0231D;padding:10px;border-radius:10px;margin:8px 0}.good{background:#E9F7F1;color:#0E754C;padding:10px;border-radius:10px;margin:8px 0}
+.nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--fd);padding:6px;z-index:5}.nav button,.side button{background:none;border:0;color:var(--gl);font:600 13px 'Plus Jakarta Sans';opacity:.75;cursor:pointer}.nav button{flex:1;min-height:56px}.nav .on,.side .on{opacity:1;color:#fff}.side{display:none}
+.intro,.center{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:radial-gradient(circle at 30% 20%,#1C4D3E,var(--fd) 70%);color:#fff}
+.mono{width:88px;height:88px;border-radius:22px;border:2px solid var(--g);display:grid;place-items:center;font:700 30px 'Space Grotesk';color:var(--g);box-shadow:0 0 40px #c5a05940;margin-bottom:16px}
+.intro h1{color:#fff;letter-spacing:.08em;margin:.2em}.intro .s{color:var(--g);letter-spacing:.22em;font-size:11px}.intro .m{font:italic 24px Georgia,serif;color:var(--gl);margin:18px 0 8px}
+.fade{animation:f 1s ease both}@keyframes f{from{opacity:0;transform:translateY(10px)}}@media(prefers-reduced-motion:reduce){.fade{animation:none}}
+@media(min-width:900px){.nav{display:none}.app{padding:0 0 0 230px}.side{display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;width:230px;background:var(--fd);padding:16px;gap:2px}.side button{text-align:left;padding:12px;border-radius:10px;font-size:15px}.side .on{background:#1C4D3E}}
