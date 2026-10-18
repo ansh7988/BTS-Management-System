@@ -449,10 +449,7 @@ export default function ShipForm({ d, go, load, sel }) {
           <div>{I('unit', 'Unit')}</div>
         </div>
 
-        {I('expected_date', 'Expected Delivery (optional)', {
-  type: 'date',
-  onChange: undefined
-})}
+        {I('expected_date', 'Expected Delivery (optional)', { type: 'date' })}
         <label>Status</label>
         <select
           className="in"
