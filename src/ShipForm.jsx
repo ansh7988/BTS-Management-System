@@ -1,7 +1,6 @@
-
 import { useRef, useState } from 'react'
-import { sb, r2, tot } from './db.js'
-import { Call, pick, uid, today, phoneOk, cleanPhone } from './common.jsx'
+import { sb, r2, tot, inr } from './db.js'
+import { Call, Alert, Icon, pick, uid, today, phoneOk, cleanPhone } from './common.jsx'
 
 const SV = ['FTL', 'PTL', 'Industrial Goods Transport']
 const ST = ['Booked', 'Dispatched', 'In Transit', 'Delivered', 'Cancelled']
@@ -39,15 +38,16 @@ export default function ShipForm({ d, go, load, sel }) {
   const [m, setM] = useState('')
 
   const I = (k, l, p = {}) => (
-    <>
-      <label>{l}</label>
+    <div className="fld">
+      <label htmlFor={'f-' + k}>{l}</label>
       <input
+        id={'f-' + k}
         className="in"
         value={f[k] ?? ''}
         onChange={x => setF({ ...f, [k]: x.target.value })}
         {...p}
       />
-    </>
+    </div>
   )
 
   const save = async () => {
@@ -302,62 +302,75 @@ export default function ShipForm({ d, go, load, sel }) {
     setBusy(false)
   }
 
+  const coMatch = d.companies.find(
+    c => c.name.toLowerCase() === (f.company || '').trim().toLowerCase()
+  )
+  const dueNow =
+    f.customer_freight === undefined || f.customer_freight === ''
+      ? null
+      : r2(+f.customer_freight + (+f.extra_charges || 0) - (+f.deductions || 0))
+
   return (
     <>
-      <h1>{e ? 'Edit Shipment ' + e.code : 'Add New Truck'}</h1>
+      <div className="bar">
+        <p className="sub-t">
+          {e ? 'Editing shipment ' + e.code : 'Fields marked * are required.'}
+        </p>
+      </div>
 
-      <div className="card">
-        <div className="grid">
-          <div>{I('dispatch_date', 'Dispatch Date *', { type: 'date' })}</div>
-
-          <div>
-            <label>Shipment Type</label>
-            <select
-              className="in"
-              value={f.service}
-              onChange={x => setF({ ...f, service: x.target.value })}
-            >
-              {SV.map(x => <option key={x}>{x}</option>)}
-            </select>
+      <div className="fcols">
+        <section className="card fcard">
+          <h2>Shipment</h2>
+          <div className="fgrid k2">
+            {I('dispatch_date', 'Dispatch Date *', { type: 'date' })}
+            <div className="fld">
+              <label htmlFor="f-service">Shipment Type</label>
+              <select
+                id="f-service"
+                className="in"
+                value={f.service}
+                onChange={x => setF({ ...f, service: x.target.value })}
+              >
+                {SV.map(x => <option key={x}>{x}</option>)}
+              </select>
+            </div>
           </div>
-        </div>
-
-        <div className="grid">
-          <div>
+          <div className="fgrid k2">
             {I('truck_no', 'Truck Number *', {
               placeholder: 'PB10AB1234',
               autoCapitalize: 'characters'
             })}
+            {I('truck_type', 'Truck Type (optional)')}
           </div>
-          <div>{I('truck_type', 'Truck Type (optional)')}</div>
-        </div>
-      </div>
+          <div className="fld">
+            <label htmlFor="f-status">Status</label>
+            <select
+              id="f-status"
+              className="in"
+              value={f.status}
+              onChange={x => setF({ ...f, status: x.target.value })}
+            >
+              {ST.map(x => <option key={x}>{x}</option>)}
+            </select>
+          </div>
+        </section>
 
-      <div className="card">
-        <h2>Company</h2>
+        <section className="card fcard">
+          <h2>Company</h2>
 
-        <datalist id="cl">
-          {d.companies.map(c => <option key={c.id} value={c.name} />)}
-        </datalist>
+          <datalist id="cl">
+            {d.companies.map(c => <option key={c.id} value={c.name} />)}
+          </datalist>
 
-        {I('company', 'Company Name *', { list: 'cl' })}
+          {I('company', 'Company Name *', { list: 'cl' })}
 
-        {(d.companies.find(
-          c => c.name.toLowerCase() === (f.company || '').trim().toLowerCase()
-        )?.contacts || []).length > 0 && (
-          <div className="acts">
-            {d.companies
-              .find(
-                c =>
-                  c.name.toLowerCase() ===
-                  f.company.trim().toLowerCase()
-              )
-              .contacts.map((x, i) => (
+          {(coMatch?.contacts || []).length > 0 && (
+            <div className="chips">
+              {coMatch.contacts.map((x, i) => (
                 <button
                   key={i}
                   type="button"
-                  className="btn o"
-                  style={{ minHeight: 40 }}
+                  className="btn o s"
                   onClick={() =>
                     setF({
                       ...f,
@@ -369,148 +382,158 @@ export default function ShipForm({ d, go, load, sel }) {
                   {x.role}: {x.name || x.phone}
                 </button>
               ))}
+            </div>
+          )}
+
+          <div className="fgrid k2">
+            {I('contact_name', 'Contact Person')}
+            {I('contact_phone', 'Contact Phone', {
+              type: 'tel',
+              inputMode: 'tel'
+            })}
           </div>
-        )}
 
-        {I('contact_name', 'Contact Person')}
-        {I('contact_phone', 'Contact Phone', {
-          type: 'tel',
-          inputMode: 'tel'
-        })}
+          <div className="acts" style={{ marginTop: 0, marginBottom: 12 }}>
+            <button
+              type="button"
+              className="btn o s"
+              onClick={() =>
+                pick((n, p) =>
+                  setF(z => ({
+                    ...z,
+                    contact_name: n,
+                    contact_phone: p
+                  }))
+                )
+              }
+            >
+              <Icon n="contact" />
+              Select Contact
+            </button>
+            <Call n={f.contact_phone} />
+          </div>
+        </section>
 
-        <div className="acts">
-          <button
-            type="button"
-            className="btn o"
-            onClick={() =>
-              pick((n, p) =>
-                setF(z => ({
-                  ...z,
-                  contact_name: n,
-                  contact_phone: p
-                }))
-              )
-            }
-          >
-            Select Contact
-          </button>
-          <Call n={f.contact_phone} />
-        </div>
-      </div>
+        <section className="card fcard">
+          <h2>Driver</h2>
 
-      <div className="card">
-        <h2>Driver</h2>
+          <datalist id="dl">
+            {d.drivers.map(c => <option key={c.id} value={c.name} />)}
+          </datalist>
 
-        <datalist id="dl">
-          {d.drivers.map(c => <option key={c.id} value={c.name} />)}
-        </datalist>
+          <div className="fgrid k2">
+            {I('driver', 'Driver Name *', { list: 'dl' })}
+            {I('driver_phone', 'Driver Phone', {
+              type: 'tel',
+              inputMode: 'tel'
+            })}
+          </div>
 
-        {I('driver', 'Driver Name *', { list: 'dl' })}
-        {I('driver_phone', 'Driver Phone', {
-          type: 'tel',
-          inputMode: 'tel'
-        })}
+          <div className="acts" style={{ marginTop: 0, marginBottom: 12 }}>
+            <button
+              type="button"
+              className="btn o s"
+              onClick={() =>
+                pick((n, p) =>
+                  setF(z => ({
+                    ...z,
+                    driver: n,
+                    driver_phone: p
+                  }))
+                )
+              }
+            >
+              <Icon n="contact" />
+              Select Contact
+            </button>
+            <Call n={f.driver_phone} t="Call Driver" />
+          </div>
+        </section>
 
-        <div className="acts">
-          <button
-            type="button"
-            className="btn o"
-            onClick={() =>
-              pick((n, p) =>
-                setF(z => ({
-                  ...z,
-                  driver: n,
-                  driver_phone: p
-                }))
-              )
-            }
-          >
-            Select Contact
-          </button>
-          <Call n={f.driver_phone} t="Call Driver" />
-        </div>
-      </div>
+        <section className="card fcard">
+          <h2>Route and cargo</h2>
+          <div className="fgrid k2">
+            {I('origin', 'From *')}
+            {I('destination', 'To *')}
+          </div>
 
-      <div className="card">
-        <div className="grid">
-          <div>{I('origin', 'From *')}</div>
-          <div>{I('destination', 'To *')}</div>
-        </div>
+          {I('goods', 'Goods')}
 
-        {I('goods', 'Goods')}
-
-        <div className="grid">
-          <div>
+          <div className="fgrid k2">
             {I('weight', 'Weight / Quantity', {
               type: 'number',
               inputMode: 'decimal'
             })}
+            {I('unit', 'Unit')}
           </div>
-          <div>{I('unit', 'Unit')}</div>
-        </div>
 
-        {I('expected_date', 'Expected Delivery (optional)', { type: 'date' })}
-        <label>Status</label>
-        <select
-          className="in"
-          value={f.status}
-          onChange={x => setF({ ...f, status: x.target.value })}
-        >
-          {ST.map(x => <option key={x}>{x}</option>)}
-        </select>
-      </div>
+          {I('expected_date', 'Expected Delivery (optional)', { type: 'date' })}
+        </section>
 
-      <div className="card">
-        <h2>Amounts (₹)</h2>
+        <section className="card fcard fwide">
+          <h2>Amounts (₹)</h2>
 
-        {I('customer_freight', 'Company Freight *', {
-          type: 'number',
-          inputMode: 'decimal'
-        })}
+          <div className="fgrid k3">
+            {I('customer_freight', 'Company Freight *', {
+              type: 'number',
+              inputMode: 'decimal'
+            })}
 
-        {I('driver_freight', 'Driver Freight *', {
-          type: 'number',
-          inputMode: 'decimal'
-        })}
+            {I('driver_freight', 'Driver Freight *', {
+              type: 'number',
+              inputMode: 'decimal'
+            })}
 
-        {I('commission', 'BTS Commission *', {
-          type: 'number',
-          inputMode: 'decimal'
-        })}
-
-        <div className="grid">
-          <div>
-            {I('extra_charges', 'Extra Charges (added to company amount)', {
+            {I('commission', 'BTS Commission *', {
               type: 'number',
               inputMode: 'decimal'
             })}
           </div>
-          <div>
+
+          <div className="fgrid k2">
+            {I('extra_charges', 'Extra Charges (added to company amount)', {
+              type: 'number',
+              inputMode: 'decimal'
+            })}
             {I('deductions', 'Deductions (taken off company amount)', {
               type: 'number',
               inputMode: 'decimal'
             })}
           </div>
-        </div>
 
-        {I('notes', 'Notes')}
+          {dueNow !== null && (
+            <div className="derived">
+              <span>Amount due from company</span>
+              <b>{inr(dueNow)}</b>
+            </div>
+          )}
+
+          {I('notes', 'Notes')}
+        </section>
       </div>
 
-      {m && <div className="err">{m}</div>}
+      {m && <Alert>{m}</Alert>}
 
-      <button className="btn g w" disabled={busy} onClick={save}>
-        {busy ? 'Saving…' : 'Save Shipment'}
-      </button>
-
-      {e && (
+      <div className="acts formbar">
         <button
-          className="btn o w"
-          style={{ marginTop: 8 }}
-          onClick={() => go('ship', e.id)}
+          className="btn g"
+          style={{ flex: '1 1 220px' }}
+          disabled={busy}
+          onClick={save}
         >
-          Close Without Saving
+          {busy ? 'Saving…' : 'Save Shipment'}
         </button>
-      )}
+
+        {e && (
+          <button
+            className="btn o"
+            style={{ flex: '1 1 160px' }}
+            onClick={() => go('ship', e.id)}
+          >
+            Close Without Saving
+          </button>
+        )}
+      </div>
     </>
   )
 }
